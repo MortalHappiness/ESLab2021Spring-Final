@@ -34,12 +34,9 @@ connection.onmessage = (message) => {
   }
 };
 
-setInterval(() => {
-  if (state.x === null || state.y === null) return;
-  console.log(state);
-}, 500);
-
 // ========================================
+
+const MAP_SIZE = 512;
 
 let type = "WebGL";
 if (!PIXI.utils.isWebGLSupported()) {
@@ -49,7 +46,23 @@ if (!PIXI.utils.isWebGLSupported()) {
 PIXI.utils.sayHello(type);
 
 //Create a Pixi Application
-let app = new PIXI.Application({ width: 256, height: 256 });
+let app = new PIXI.Application({ width: MAP_SIZE, height: MAP_SIZE });
 
 //Add the canvas that Pixi automatically created for you to the HTML document
 document.body.appendChild(app.view);
+
+// ========================================
+
+const gr = new PIXI.Graphics();
+gr.beginFill(0xffffff);
+gr.drawCircle(MAP_SIZE / 2, MAP_SIZE / 2, 10);
+gr.endFill();
+app.stage.addChild(gr);
+gr.visible = false;
+
+setInterval(() => {
+  if (state.x === null || state.y === null) return;
+  gr.visible = true;
+  gr.x = state.x * (MAP_SIZE / 2);
+  gr.y = state.y * (MAP_SIZE / 2);
+}, 200);
