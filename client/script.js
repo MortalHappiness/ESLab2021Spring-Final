@@ -6,8 +6,17 @@ if (!window.WebSocket) {
 
 const connection = new WebSocket(`ws://${window.location.host}`);
 
+const state = {
+  x: null,
+  y: null,
+};
+
 connection.onopen = () => {
-  connection.send("a");
+  console.log("Connected to server");
+};
+
+connection.onclose = () => {
+  console.log("Disconnected from server");
 };
 
 connection.onerror = (error) => {
@@ -15,8 +24,20 @@ connection.onerror = (error) => {
 };
 
 connection.onmessage = (message) => {
-  console.log(message);
+  try {
+    const data = JSON.parse(message.data);
+    console.log("Received: ", data);
+    state.x = data.x;
+    state.y = data.y;
+  } catch (e) {
+    console.error(e);
+  }
 };
+
+setInterval(() => {
+  if (state.x === null || state.y === null) return;
+  console.log(state);
+}, 500);
 
 // ========================================
 

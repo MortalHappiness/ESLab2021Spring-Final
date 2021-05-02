@@ -17,5 +17,6 @@ npm run production
 ### Environment variables (And their default value)
 
 ```
-PORT=8000
+SERVER_PORT=8000
+SOCKET_PORT=8001
 ```
