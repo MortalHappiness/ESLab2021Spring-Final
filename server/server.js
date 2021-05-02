@@ -82,7 +82,7 @@ socketServer.listen(SOCKET_PORT, () => {
 
 // ========================================
 
-app.use(express.static("../client"));
+app.use(express.static("../frontend"));
 
 server.listen(SERVER_PORT, () => {
   console.log(`Web server listening on port ${server.address().port}`);
