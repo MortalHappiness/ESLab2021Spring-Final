@@ -11,7 +11,8 @@ Mbed Fruit Ninja (搖桿切西瓜遊戲)
 
 ## Preliminary Lab Presentation
 
-[slide](/demo/preliminary.pdf)
++ [Google slide](https://docs.google.com/presentation/d/1tytz8w-z3w_URjpiuiBZuMd1dZaJkwI-nLDMTPTNriM/edit?usp=sharing)
++ [pdf slide](/demo/preliminary.pdf)
 
 ## Start Server
 
