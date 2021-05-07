@@ -4,7 +4,7 @@ const http = require("http");
 const WebSocket = require("ws");
 const { nanoid } = require("nanoid");
 
-const SERVER_PORT = process.env.PORT || 8000;
+const SERVER_PORT = process.env.SERVER_PORT || 8000;
 const SOCKET_PORT = process.env.SOCKET_PORT || 8001;
 
 const app = express();
