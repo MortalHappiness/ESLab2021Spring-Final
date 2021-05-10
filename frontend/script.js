@@ -1,42 +1,12 @@
-window.WebSocket = window.WebSocket || window.MozWebSocket;
-if (!window.WebSocket) {
-  document.write("Sorry, your browser doesn't support WebSocket.");
-  throw new Error("Browser does not support WebSocket");
-}
-
-const connection = new WebSocket(`ws://${window.location.host}`);
+const MAP_SIZE = 512;
 
 const state = {
+  pressed: false,
   x: null,
   y: null,
 };
 
-connection.onopen = () => {
-  console.log("Connected to server");
-};
-
-connection.onclose = () => {
-  console.log("Disconnected from server");
-};
-
-connection.onerror = (error) => {
-  console.error(error);
-};
-
-connection.onmessage = (message) => {
-  try {
-    const data = JSON.parse(message.data);
-    console.log("Received: ", data);
-    state.x = data.x;
-    state.y = data.y;
-  } catch (e) {
-    console.error(e);
-  }
-};
-
 // ========================================
-
-const MAP_SIZE = 512;
 
 let type = "WebGL";
 if (!PIXI.utils.isWebGLSupported()) {
@@ -60,9 +30,45 @@ gr.endFill();
 app.stage.addChild(gr);
 gr.visible = false;
 
-setInterval(() => {
+function rerender() {
   if (state.x === null || state.y === null) return;
   gr.visible = true;
+  gr.tint = state.pressed ? 0xff0000 : 0xffffff;
   gr.x = state.x * (MAP_SIZE / 2);
   gr.y = state.y * (MAP_SIZE / 2);
-}, 200);
+}
+
+// ========================================
+
+window.WebSocket = window.WebSocket || window.MozWebSocket;
+if (!window.WebSocket) {
+  document.write("Sorry, your browser doesn't support WebSocket.");
+  throw new Error("Browser does not support WebSocket");
+}
+
+const connection = new WebSocket(`ws://${window.location.host}`);
+
+connection.onopen = () => {
+  console.log("Connected to server");
+};
+
+connection.onclose = () => {
+  console.log("Disconnected from server");
+};
+
+connection.onerror = (error) => {
+  console.error(error);
+};
+
+connection.onmessage = (message) => {
+  try {
+    const data = JSON.parse(message.data);
+    console.log("Received: ", data);
+    state.pressed = data.pressed;
+    state.x = data.x;
+    state.y = data.y;
+    rerender();
+  } catch (e) {
+    console.error(e);
+  }
+};

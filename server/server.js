@@ -15,6 +15,7 @@ const socketServer = net.createServer();
 // ========================================
 
 const state = {
+  pressed: false,
   x: 0,
   y: 0,
 };
@@ -50,6 +51,12 @@ socketServer.on("connection", (socket) => {
     try {
       const data = JSON.parse(message.toString());
       console.log("Receive", data, `from STM32 ${socket.id}`);
+      if (data.mouse === "down") {
+        state.pressed = true;
+      }
+      if (data.mouse === "up") {
+        state.pressed = false;
+      }
       if (typeof data.dx === "number" || typeof data.dy === "number") {
         data.dx = data.dx || 0;
         data.dy = data.dy || 0;
@@ -57,13 +64,13 @@ socketServer.on("connection", (socket) => {
         state.y += data.dy;
         state.x = Math.max(Math.min(state.x, 1), -1);
         state.y = Math.max(Math.min(state.y, 1), -1);
-        // broadcast state information to all frontend clients
-        wss.clients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(state));
-          }
-        });
       }
+      // broadcast state information to all frontend clients
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(state));
+        }
+      });
     } catch (e) {
       console.error(
         `Invalid message from STM32 ${socket.id}: ${message.toString()}`
