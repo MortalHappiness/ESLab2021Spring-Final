@@ -1,0 +1,172 @@
+{"frames": {
+
+"halffruit0.png":
+{
+	"frame": {"x":936,"y":549,"w":256,"h":466},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":466},
+	"sourceSize": {"w":256,"h":466}
+},
+"halffruit1.png":
+{
+	"frame": {"x":0,"y":549,"w":340,"h":434},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":340,"h":434},
+	"sourceSize": {"w":340,"h":434}
+},
+"halffruit2.png":
+{
+	"frame": {"x":280,"y":238,"w":299,"h":247},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":299,"h":247},
+	"sourceSize": {"w":299,"h":247}
+},
+"halffruit3.png":
+{
+	"frame": {"x":0,"y":238,"w":280,"h":238},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":280,"h":238},
+	"sourceSize": {"w":280,"h":238}
+},
+"halffruit4.png":
+{
+	"frame": {"x":1064,"y":0,"w":192,"h":192},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":192,"h":192},
+	"sourceSize": {"w":192,"h":192}
+},
+"halffruit5.png":
+{
+	"frame": {"x":0,"y":0,"w":196,"h":174},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":196,"h":174},
+	"sourceSize": {"w":196,"h":174}
+},
+"halffruit6.png":
+{
+	"frame": {"x":632,"y":0,"w":240,"h":180},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":240,"h":180},
+	"sourceSize": {"w":240,"h":180}
+},
+"halffruit7.png":
+{
+	"frame": {"x":878,"y":238,"w":200,"h":281},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":281},
+	"sourceSize": {"w":200,"h":281}
+},
+"halffruit8.png":
+{
+	"frame": {"x":1256,"y":0,"w":251,"h":201},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":251,"h":201},
+	"sourceSize": {"w":251,"h":201}
+},
+"halffruit9.png":
+{
+	"frame": {"x":1278,"y":238,"w":467,"h":311},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":467,"h":311},
+	"sourceSize": {"w":467,"h":311}
+},
+"halffruit10.png":
+{
+	"frame": {"x":392,"y":0,"w":240,"h":180},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":240,"h":180},
+	"sourceSize": {"w":240,"h":180}
+},
+"halffruit11.png":
+{
+	"frame": {"x":1078,"y":238,"w":200,"h":281},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":200,"h":281},
+	"sourceSize": {"w":200,"h":281}
+},
+"halffruit12.png":
+{
+	"frame": {"x":680,"y":549,"w":256,"h":466},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":256,"h":466},
+	"sourceSize": {"w":256,"h":466}
+},
+"halffruit13.png":
+{
+	"frame": {"x":340,"y":549,"w":340,"h":434},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":340,"h":434},
+	"sourceSize": {"w":340,"h":434}
+},
+"halffruit14.png":
+{
+	"frame": {"x":579,"y":238,"w":299,"h":247},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":299,"h":247},
+	"sourceSize": {"w":299,"h":247}
+},
+"halffruit15.png":
+{
+	"frame": {"x":1741,"y":0,"w":280,"h":238},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":280,"h":238},
+	"sourceSize": {"w":280,"h":238}
+},
+"halffruit16.png":
+{
+	"frame": {"x":872,"y":0,"w":192,"h":192},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":192,"h":192},
+	"sourceSize": {"w":192,"h":192}
+},
+"halffruit17.png":
+{
+	"frame": {"x":196,"y":0,"w":196,"h":174},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":196,"h":174},
+	"sourceSize": {"w":196,"h":174}
+},
+"halffruit18.png":
+{
+	"frame": {"x":1507,"y":0,"w":234,"h":210},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":234,"h":210},
+	"sourceSize": {"w":234,"h":210}
+},
+"halffruit19.png":
+{
+	"frame": {"x":1192,"y":549,"w":598,"h":900},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":598,"h":900},
+	"sourceSize": {"w":598,"h":900}
+}},
+"meta": {
+	"app": "http://www.codeandweb.com/texturepacker",
+	"version": "1.0",
+	"image": "halffruits.png",
+	"format": "RGBA8888",
+	"size": {"w":2021,"h":1449},
+	"scale": "1",
+	"smartupdate": "$TexturePacker:SmartUpdate:ff610690ddf3705477cec9f3cd99f445:eb45c0edbf7c64d87c7243cb46d3ebcd:3e1870e9da20a85e9531f48064146d3a$"
+}
+}
