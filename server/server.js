@@ -90,6 +90,7 @@ socketServer.listen(SOCKET_PORT, () => {
 // ========================================
 
 app.use(express.static("../frontend/build"));
+app.use("/assets", express.static("../frontend/assets"));
 
 server.listen(SERVER_PORT, () => {
   console.log(`Web server listening on port ${server.address().port}`);
