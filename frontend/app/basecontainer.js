@@ -29,11 +29,9 @@
  * > this.remove('fruits')
  */
 
-import PIXI from 'pixi.js';
-
+import PIXI from "pixi.js";
 
 export default class BaseContainer extends PIXI.Container {
-
   constructor(...args) {
     super(...args);
   }
@@ -44,25 +42,20 @@ export default class BaseContainer extends PIXI.Container {
 
   add(name, child, at = null) {
     // Make new set container if not existing
-    if (this[name] === undefined)
-      this[name] = new Set();
+    if (this[name] === undefined) this[name] = new Set();
 
     const uid = BaseContainer.randomUID();
 
-    if (child === undefined)
-      throw `ChildUndefined: ${name}`;
+    if (child === undefined) throw `ChildUndefined: ${name}`;
     child.name = uid;
     this[name].add(uid);
 
-    if (at == null)
-      this.addChild(child);
-    else
-      this.addChildAt(child, at);
+    if (at == null) this.addChild(child);
+    else this.addChildAt(child, at);
   }
 
   get(name, uid = null) {
-    if (this[name] === undefined || this[name].size === 0)
-      return undefined;
+    if (this[name] === undefined || this[name].size === 0) return undefined;
 
     /**
      * return first element (since `get` is only called for name
@@ -76,13 +69,11 @@ export default class BaseContainer extends PIXI.Container {
   getAll(name) {
     // Get all elements corresponding to `name` reference
 
-    if (this[name] === undefined)
-      return [];
+    if (this[name] === undefined) return [];
 
     const children = [];
 
-    for(let e of this[name])
-      children.push(this.getChildByName(e));
+    for (let e of this[name]) children.push(this.getChildByName(e));
 
     return children;
   }
@@ -95,15 +86,14 @@ export default class BaseContainer extends PIXI.Container {
 
     const _remove = () => {
       if (uid === null) {
-        for(let e of this.getAll(name))
-          this.removeChild(e);
+        for (let e of this.getAll(name)) this.removeChild(e);
 
         delete this[name];
       } else {
         this.removeChild(this.get(name, uid));
         this[name].delete(uid);
       }
-    }
+    };
 
     try {
       _remove();
@@ -111,5 +101,4 @@ export default class BaseContainer extends PIXI.Container {
       console.log(`${name} already removed`);
     }
   }
-
 }

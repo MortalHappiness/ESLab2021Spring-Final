@@ -3,23 +3,21 @@
  * related to fruits, cut fruits, splashes and drops
  */
 
-import PIXI from 'pixi.js';
+import PIXI from "pixi.js";
 
-import { Config, imageMappings, dropsColor, specials } from './config';
-import BaseContainer from './basecontainer';
-import { isIntersecting } from './helpers';
-import { LoaderContainer } from './others';
-
+import { Config, imageMappings, dropsColor, specials } from "./config";
+import BaseContainer from "./basecontainer";
+import { isIntersecting } from "./helpers";
+import { LoaderContainer } from "./others";
 
 export default class GamePlayContainer extends BaseContainer {
-
   constructor(mode) {
     super();
 
     this.filesToLoad = 5;
     this.filesLoaded = 0;
     this.boardInitialized = false;
-    this.startTime = +new Date;
+    this.startTime = +new Date();
     this.mode = mode;
     this.score = 0;
     this.missed = 0;
@@ -42,63 +40,55 @@ export default class GamePlayContainer extends BaseContainer {
   }
 
   loadTextures() {
-    PIXI.loader
-      .add('assets/fruits.json')
-      .load(() => {
-        this.assetLoaded();
-      });
-    PIXI.loader
-      .add('assets/halffruits.json')
-      .load(() => {
-        this.assetLoaded();
-      });
-    PIXI.loader
-      .add('assets/splashes.json')
-      .load(() => {
-        this.assetLoaded();
-      });
-    PIXI.loader
-      .add('assets/nums.json')
-      .load(() => {
-        this.assetLoaded();
-      });
-    PIXI.loader
-      .add('assets/speciallabels.json')
-      .load(() => {
-        this.assetLoaded();
-      });
+    PIXI.loader.add("assets/fruits.json").load(() => {
+      this.assetLoaded();
+    });
+    PIXI.loader.add("assets/halffruits.json").load(() => {
+      this.assetLoaded();
+    });
+    PIXI.loader.add("assets/splashes.json").load(() => {
+      this.assetLoaded();
+    });
+    PIXI.loader.add("assets/nums.json").load(() => {
+      this.assetLoaded();
+    });
+    PIXI.loader.add("assets/speciallabels.json").load(() => {
+      this.assetLoaded();
+    });
 
     const dropAsTexture = (color) => {
-      let dropRenderer = new PIXI.CanvasRenderer(100, 100, {transparent: true});
+      let dropRenderer = new PIXI.CanvasRenderer(100, 100, {
+        transparent: true,
+      });
       let drop = new PIXI.Graphics();
       drop.beginFill(color, 1);
       drop.drawCircle(50, 50, Config.drops.rad);
       drop.endFill();
       dropRenderer.render(drop);
       return dropRenderer.view;
-    }
+    };
 
     this.dropTextures = {};
     dropsColor.forEach((color, i) => {
-      this.dropTextures[color] = new PIXI.Texture.fromCanvas(dropAsTexture(color));
+      this.dropTextures[color] = new PIXI.Texture.fromCanvas(
+        dropAsTexture(color)
+      );
     });
   }
-
 
   animate() {
     if (this.parent.pause) return;
 
     const addNewFruits = () => {
-
       const sampleFruit = () => {
         // let id = Math.floor(Math.random() * 10);
         let id = Math.floor(Math.random() * 14);
         return id;
-      }
+      };
 
       const getNewFruit = (id) => {
         const details = {
-          x: (Math.random() * (Config.ww - 200)) + 50,
+          x: Math.random() * (Config.ww - 200) + 50,
           y: Config.wh,
           vx: Math.max(1, Math.random() * Config.fruit.vx),
           vy: Config.fruit.vy,
@@ -111,43 +101,42 @@ export default class GamePlayContainer extends BaseContainer {
           omega: Math.random() * 0.01 * (Math.random() > 0.5 ? 1 : -1),
         };
 
-        if (details.x > Config.ww / 2)
-          details.vx *= -1;
+        if (details.x > Config.ww / 2) details.vx *= -1;
 
         const fruit = new PIXI.Sprite(PIXI.Texture.fromFrame(`fruit${id}.png`));
 
-        id = (id >= 10) ? specials[id-10] : `fruit${id}`;
-        Object.assign(fruit, details, {id});
+        id = id >= 10 ? specials[id - 10] : `fruit${id}`;
+        Object.assign(fruit, details, { id });
 
         return fruit;
-      }
+      };
 
-      let fruitCount = this.getAll('fruits').length;
+      let fruitCount = this.getAll("fruits").length;
 
       if (fruitCount < this.fruitsThrowRate) {
-        this.add('fruits', getNewFruit(sampleFruit()));
+        this.add("fruits", getNewFruit(sampleFruit()));
       }
-
-    }
+    };
 
     // Define animation function for all elements
 
     const getPercentLoad = () => {
       let percentage = this.filesLoaded / this.filesToLoad;
-      percentage = Math.max(percentage, (+new Date - this.startTime) / 500);
+      percentage = Math.max(percentage, (+new Date() - this.startTime) / 500);
       percentage = Math.min(percentage, 1);
       return percentage;
     };
 
     const animateFruits = () => {
-      let count = 0, fruitsMissed = 0;
+      let count = 0,
+        fruitsMissed = 0;
 
-      for (const fruit of this.getAll('fruits')) {
+      for (const fruit of this.getAll("fruits")) {
         if (fruit.y > Config.wh) {
           fruitsMissed += 1;
-          this.remove('fruits', fruit.name);
+          this.remove("fruits", fruit.name);
         } else {
-          let ratio = ((this.freezeTimer > 0) ? 0.5 : 1);
+          let ratio = this.freezeTimer > 0 ? 0.5 : 1;
           fruit.x += fruit.vx * ratio;
           fruit.y += fruit.vy * ratio;
           fruit.vy += Config.acc * ratio;
@@ -160,18 +149,15 @@ export default class GamePlayContainer extends BaseContainer {
     };
 
     const animateSplashes = () => {
-      for(const splash of this.getAll('splashes')) {
-        if(splash.alpha <= 0)
-          this.remove('splashes', splash.name);
-        else
-          splash.alpha -= 0.01;
+      for (const splash of this.getAll("splashes")) {
+        if (splash.alpha <= 0) this.remove("splashes", splash.name);
+        else splash.alpha -= 0.01;
       }
     };
 
     const animateCutFruits = () => {
-      for (const hf of this.getAll('halfFruits')) {
-        if (hf.alpha <= 0)
-          this.remove('halfFruits', hf.name);
+      for (const hf of this.getAll("halfFruits")) {
+        if (hf.alpha <= 0) this.remove("halfFruits", hf.name);
         else {
           hf.x += hf.vx;
           hf.y += hf.vy;
@@ -181,9 +167,8 @@ export default class GamePlayContainer extends BaseContainer {
     };
 
     const animateDrops = () => {
-      for (const drop of this.getAll('drops')) {
-        if (drop.scale.x < 0)
-          this.remove('drops', drop.name);
+      for (const drop of this.getAll("drops")) {
+        if (drop.scale.x < 0) this.remove("drops", drop.name);
         else {
           // Move drops while decreasing size
           const details = drop.details;
@@ -196,41 +181,37 @@ export default class GamePlayContainer extends BaseContainer {
     };
 
     const animateSpecialFruitTakenLabels = () => {
-      this.getAll('specialFruitTakenLabels').forEach((label) => {
+      this.getAll("specialFruitTakenLabels").forEach((label) => {
         if (label.y < 100 || label.scale.x < 0.2)
-          this.remove('specialFruitTakenLabels', label.name);
+          this.remove("specialFruitTakenLabels", label.name);
 
         label.scale.x -= 0.01;
         label.scale.y -= 0.01;
         label.y -= 10;
       });
-    }
+    };
 
     const animateSpecialFruitTakenLayers = () => {
-      if (this.frenzyTimer === 0)
-        this.remove('frenzyLayer');
-      if (this.freezeTimer === 0)
-        this.remove('freezeLayer');
-      if (this.doubleTimer === 0)
-        this.remove('doubleLayer');
-      if (this.bombTimer === 0)
-        this.remove('bombLayer');
+      if (this.frenzyTimer === 0) this.remove("frenzyLayer");
+      if (this.freezeTimer === 0) this.remove("freezeLayer");
+      if (this.doubleTimer === 0) this.remove("doubleLayer");
+      if (this.bombTimer === 0) this.remove("bombLayer");
 
       this.freezeTimer = Math.max(this.freezeTimer - 1, 0);
       this.frenzyTimer = Math.max(this.frenzyTimer - 1, 0);
       this.doubleTimer = Math.max(this.doubleTimer - 1, 0);
       this.bombTimer = Math.max(this.bombTimer - 1, 0);
 
-      if (this.frenzyTimer === 0)
-        this.fruitsThrowRate = 2;
+      if (this.frenzyTimer === 0) this.fruitsThrowRate = 2;
 
-      if (this.doubleTimer === 0)
-        this.scoreMultiplier = 1;
-    }
+      if (this.doubleTimer === 0) this.scoreMultiplier = 1;
+    };
 
     // Images not loaded yet
-    if ((this.filesLoaded < this.filesToLoad) ||
-        (+new Date - this.startTime) / 1000 < 0.5) {
+    if (
+      this.filesLoaded < this.filesToLoad ||
+      (+new Date() - this.startTime) / 1000 < 0.5
+    ) {
       return getPercentLoad();
     }
 
@@ -258,14 +239,13 @@ export default class GamePlayContainer extends BaseContainer {
 
     animateSplashes();
 
-    this.get('scoreBoard').animate(this.score);
+    this.get("scoreBoard").animate(this.score);
 
-    if(this.mode === 'archade mode') {
-      let seconds = 60 - Math.floor((+new Date - this.startTime) / 1000);
-      this.get('timeBoard').animate(seconds);
-    }
-    else if(this.mode === 'zen mode') {
-      this.get('crossBoard').animate(this.missed);
+    if (this.mode === "archade mode") {
+      let seconds = 60 - Math.floor((+new Date() - this.startTime) / 1000);
+      this.get("timeBoard").animate(seconds);
+    } else if (this.mode === "zen mode") {
+      this.get("crossBoard").animate(this.missed);
     }
 
     animateSpecialFruitTakenLabels();
@@ -273,13 +253,12 @@ export default class GamePlayContainer extends BaseContainer {
   }
 
   initializeBoard() {
-    this.add('scoreBoard', new ScoreBoard());
+    this.add("scoreBoard", new ScoreBoard());
 
-    if(this.mode === 'archade mode') {
-      this.add('timeBoard', new TimeBoard());
-    }
-    else if(this.mode === 'zen mode') {
-      this.add('crossBoard', new CrossBoard());
+    if (this.mode === "archade mode") {
+      this.add("timeBoard", new TimeBoard());
+    } else if (this.mode === "zen mode") {
+      this.add("crossBoard", new CrossBoard());
     }
   }
 
@@ -290,7 +269,7 @@ export default class GamePlayContainer extends BaseContainer {
      */
 
     const checkIfIntersection = (mouseData, fruit) => {
-      if(mouseData.length < 2) return false;
+      if (mouseData.length < 2) return false;
 
       let p1, p2;
       [p1, p2] = [...mouseData];
@@ -329,10 +308,8 @@ export default class GamePlayContainer extends BaseContainer {
         let vy = Math.floor(Math.random() * 10);
         let radius = Config.drops.rad;
 
-        if (Math.floor(Math.random() * 2))
-          vx = -vx;
-        if (Math.floor(Math.random() * 2))
-          vy = -vy;
+        if (Math.floor(Math.random() * 2)) vx = -vx;
+        if (Math.floor(Math.random() * 2)) vy = -vy;
 
         const mapping = imageMappings[fruit.id];
         const details = {
@@ -344,7 +321,7 @@ export default class GamePlayContainer extends BaseContainer {
           color: mapping.dropColor,
           //visibleID: (Math.floor(Math.random()*2) === 0)
         };
-        this.add('drops', getNewDropViaTexture(details));
+        this.add("drops", getNewDropViaTexture(details));
       }
     };
 
@@ -363,17 +340,19 @@ export default class GamePlayContainer extends BaseContainer {
         height: Config.halfFruit.size,
       };
 
-      Object.assign(hf1, details, {x: fruit.x - 25});
-      Object.assign(hf2, details, {x: fruit.x + 25});
+      Object.assign(hf1, details, { x: fruit.x - 25 });
+      Object.assign(hf2, details, { x: fruit.x + 25 });
 
-      this.add('halfFruits', hf1);
-      this.add('halfFruits', hf2);
+      this.add("halfFruits", hf1);
+      this.add("halfFruits", hf2);
     };
 
     const initializeSplash = (fruit) => {
       const mapping = imageMappings[fruit.id];
 
-      const splash = new PIXI.Sprite(PIXI.Texture.fromFrame(`${mapping.splash}.png`));
+      const splash = new PIXI.Sprite(
+        PIXI.Texture.fromFrame(`${mapping.splash}.png`)
+      );
 
       const details = {
         x: fruit.x,
@@ -386,22 +365,21 @@ export default class GamePlayContainer extends BaseContainer {
 
       Object.assign(splash, details);
 
-      this.add('splashes', splash);
+      this.add("splashes", splash);
     };
 
     const initializeSpecialFruitTaken = (fruit) => {
-
       const clearAll = () => {
-        this.remove('fruits');
-        this.remove('halfFruits');
-        this.remove('drops');
-        this.remove('splashes');
+        this.remove("fruits");
+        this.remove("halfFruits");
+        this.remove("drops");
+        this.remove("splashes");
 
-        this.remove('specialFruitTakenLabels');
+        this.remove("specialFruitTakenLabels");
 
-        this.remove('doubleLayer');
-        this.remove('frenzyLayer');
-        this.remove('freezeLayer');
+        this.remove("doubleLayer");
+        this.remove("frenzyLayer");
+        this.remove("freezeLayer");
       };
 
       switch (fruit.id) {
@@ -424,7 +402,7 @@ export default class GamePlayContainer extends BaseContainer {
       }
 
       // Add label
-      if (fruit.id !== 'bomb') {
+      if (fruit.id !== "bomb") {
         let label = new PIXI.Sprite(PIXI.Texture.fromFrame(`${fruit.id}.png`));
         label.anchor.x = 0.5;
         label.anchor.y = 0.5;
@@ -432,17 +410,17 @@ export default class GamePlayContainer extends BaseContainer {
         label.height = 100;
         label.x = fruit.x;
         label.y = fruit.y;
-        this.add('specialFruitTakenLabels', label);
+        this.add("specialFruitTakenLabels", label);
       }
 
       // Add layer
       const layer = new PIXI.Graphics();
       layer.beginFill(Config.specialFruitLayerColor[fruit.id], 1);
       layer.drawRect(0, 0, Config.ww, Config.wh);
-      layer.alpha = (fruit.id == "bomb") ? 1 : 0.3;
+      layer.alpha = fruit.id == "bomb" ? 1 : 0.3;
       this.add(`${fruit.id}Layer`, layer);
 
-      if (fruit.id !== 'bomb') {
+      if (fruit.id !== "bomb") {
         initializeDrops(fruit);
         initializeSplash(fruit);
       }
@@ -451,11 +429,10 @@ export default class GamePlayContainer extends BaseContainer {
     const mouseData = this.parent.mouseData;
 
     let noFruitCuts = 0;
-    for (let fruit of this.getAll('fruits')) {
-      if (!checkIfIntersection(mouseData, fruit.getBounds()))
-        continue;
+    for (let fruit of this.getAll("fruits")) {
+      if (!checkIfIntersection(mouseData, fruit.getBounds())) continue;
 
-      noFruitCuts += ((fruit.id !== "bomb") ? 1 * this.scoreMultiplier : 0);
+      noFruitCuts += fruit.id !== "bomb" ? 1 * this.scoreMultiplier : 0;
 
       // Fruit cut successfull: Add splashes, drops and remove fruit
       // Bomb
@@ -469,19 +446,15 @@ export default class GamePlayContainer extends BaseContainer {
       }
 
       // Fruit previously removed if bomb
-      this.remove('fruits', fruit.name);
+      this.remove("fruits", fruit.name);
     }
     return noFruitCuts;
   }
 
-  resize() {
-
-  }
-
+  resize() {}
 }
 
 class ScoreBoard extends BaseContainer {
-
   constructor() {
     super();
     this.x = 80;
@@ -492,14 +465,12 @@ class ScoreBoard extends BaseContainer {
     let chars = [];
     while (score > 0) {
       chars.unshift(score % 10);
-      score = Math.floor(score/10);
+      score = Math.floor(score / 10);
     }
-    if (chars.length === 1)
-      chars.unshift(0);
-    if (chars.length === 0)
-      chars = [0, 0]
+    if (chars.length === 1) chars.unshift(0);
+    if (chars.length === 0) chars = [0, 0];
 
-    this.remove('chars');
+    this.remove("chars");
 
     let x = 0;
     for (let char of chars) {
@@ -509,13 +480,12 @@ class ScoreBoard extends BaseContainer {
       gr.x = x;
       gr.y = 0;
       x += 50;
-      this.add('chars', gr);
+      this.add("chars", gr);
     }
   }
 }
 
 class TimeBoard extends BaseContainer {
-
   constructor() {
     super();
     this.x = Config.ww - 250;
@@ -527,9 +497,9 @@ class TimeBoard extends BaseContainer {
     let secs = seconds % 60;
     secs = [Math.floor(secs / 10), secs % 10];
 
-    let chars = [mins, '10', ...secs]; // '10' is for ':'
+    let chars = [mins, "10", ...secs]; // '10' is for ':'
 
-    this.remove('chars');
+    this.remove("chars");
 
     let x = 0;
     for (let s of chars) {
@@ -538,17 +508,16 @@ class TimeBoard extends BaseContainer {
       gr.y = 0;
       gr.width = 40;
       gr.height = 50;
-      this.add('chars', gr);
+      this.add("chars", gr);
       x += 50;
     }
   }
 }
 
 class CrossBoard extends BaseContainer {
-
   constructor() {
     super();
-    this.x = Config.ww - 250
+    this.x = Config.ww - 250;
     this.y = 70;
   }
 
@@ -556,14 +525,14 @@ class CrossBoard extends BaseContainer {
     let cross = [];
     for (let i = 0; i < missed && i < 3; i += 1) {
       // Push red cross
-      cross.push('r');
+      cross.push("r");
     }
     while (cross.length < 3) {
       // Push black cross
-      cross.push('b');
+      cross.push("b");
     }
 
-    this.remove('crosses');
+    this.remove("crosses");
 
     let x = 0;
     for (let c of cross) {
@@ -573,8 +542,7 @@ class CrossBoard extends BaseContainer {
       gr.width = 30;
       gr.height = 30;
       x += 40;
-      this.add('crosses', gr);
+      this.add("crosses", gr);
     }
   }
 }
-

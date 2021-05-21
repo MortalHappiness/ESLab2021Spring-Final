@@ -1,22 +1,28 @@
-import PIXI from 'pixi.js';
+import PIXI from "pixi.js";
 
-import './index.html';
-import BaseContainer from './basecontainer';
-import Knife from './knife';
-import GameOptionsContainer from './gameoptions';
-import GamePlayContainer from './gameplay';
-import { HighScoreContainer, AboutGameContainer, LoaderContainer } from './others';
-import { Config } from './config';
+import "./index.html";
+import BaseContainer from "./basecontainer";
+import Knife from "./knife";
+import GameOptionsContainer from "./gameoptions";
+import GamePlayContainer from "./gameplay";
+import {
+  HighScoreContainer,
+  AboutGameContainer,
+  LoaderContainer,
+} from "./others";
+import { Config } from "./config";
 
-
-const renderer = PIXI.autoDetectRenderer(window.innerWidth,
-  window.innerHeight, {
-  antialiasing: false,
-  transparent: false,
-  resolution: window.devicePixelRatio,
-  autoResize: true,
-  backgroundColor: 0x5D371A
-});
+const renderer = PIXI.autoDetectRenderer(
+  window.innerWidth,
+  window.innerHeight,
+  {
+    antialiasing: false,
+    transparent: false,
+    resolution: window.devicePixelRatio,
+    autoResize: true,
+    backgroundColor: 0x5d371a,
+  }
+);
 
 document.body.appendChild(renderer.view);
 
@@ -38,29 +44,29 @@ class Root extends BaseContainer {
 
     this.filesToLoad = 1;
     this.filesLoaded = 0;
-    this
-      .on('mousedown', this.onMouseDown())
-      .on('touchstart', this.onMouseDown())
-      .on('mousemove', this.onMouseMove())
-      .on('touchmove', this.onMouseMove())
-      .on('mouseup', this.onMouseUp())
-      .on('mouseupoutside', this.onMouseUp())
-      .on('touchend', this.onMouseUp())
-      .on('touchendoutside', this.onMouseUp())
-      //.on('click', this.onClick)
+    this.on("mousedown", this.onMouseDown())
+      .on("touchstart", this.onMouseDown())
+      .on("mousemove", this.onMouseMove())
+      .on("touchmove", this.onMouseMove())
+      .on("mouseup", this.onMouseUp())
+      .on("mouseupoutside", this.onMouseUp())
+      .on("touchend", this.onMouseUp())
+      .on("touchendoutside", this.onMouseUp());
+    //.on('click', this.onClick)
 
     const options = ["about game", "new game", "high score"];
     const gameContainer = new GameOptionsContainer(options);
-    this.add('gameContainer', gameContainer);
+    this.add("gameContainer", gameContainer);
 
     this.loadTextures();
   }
 
   gameInit() {
-    const bg = new PIXI.Sprite(PIXI.Texture.fromFrame('bg.png'));
-    bg.height = Config.wh; bg.width = Config.ww;
+    const bg = new PIXI.Sprite(PIXI.Texture.fromFrame("bg.png"));
+    bg.height = Config.wh;
+    bg.width = Config.ww;
     bg.interactive = true;
-    this.add('bg', bg, 0);
+    this.add("bg", bg, 0);
   }
 
   assetsLoaded() {
@@ -70,11 +76,9 @@ class Root extends BaseContainer {
   }
 
   loadTextures() {
-    PIXI.loader
-      .add('assets/basics.json')
-      .load(() => {
-        this.assetsLoaded();
-      });
+    PIXI.loader.add("assets/basics.json").load(() => {
+      this.assetsLoaded();
+    });
   }
 
   onClick(e) {
@@ -87,10 +91,10 @@ class Root extends BaseContainer {
       let position = e.data.global;
       this.mouseData.push({
         x: position.x,
-        y: position.y
+        y: position.y,
       });
-      if (this.get('knife') === undefined) {
-        this.add('knife', new Knife());
+      if (this.get("knife") === undefined) {
+        this.add("knife", new Knife());
       }
     };
   }
@@ -108,11 +112,11 @@ class Root extends BaseContainer {
       if (this.cutting) {
         this.mouseData.push({
           x: position.x,
-          y: position.y
+          y: position.y,
         });
 
-        let knife = this.get('knife');
-        while(knife.shifts > 0) {
+        let knife = this.get("knife");
+        while (knife.shifts > 0) {
           this.mouseData.shift();
           knife.shifts -= 1;
         }
@@ -168,8 +172,7 @@ class Root extends BaseContainer {
 
     if (this.state == "about game" || this.state == "high score")
       this.state = "initial";
-    else
-      this.state = action;
+    else this.state = action;
 
     let gameContainer;
 
@@ -191,34 +194,31 @@ class Root extends BaseContainer {
   }
 
   animate() {
-    if (this.pause)
-      return;
+    if (this.pause) return;
 
     const animateLoader = (percentage) => {
-      this.remove('loaderContainer');
+      this.remove("loaderContainer");
       const loader = new LoaderContainer(percentage);
-      this.add('loaderContainer', loader);
+      this.add("loaderContainer", loader);
     };
 
-    let percentage = this.get('gameContainer').animate();
+    let percentage = this.get("gameContainer").animate();
     if (percentage !== undefined) {
       animateLoader(percentage);
     } else {
-      this.remove('loaderContainer');
+      this.remove("loaderContainer");
     }
 
-    let action = this.get('gameContainer').handleOptionSelection();
+    let action = this.get("gameContainer").handleOptionSelection();
     if (action != undefined) {
-        this.remove('gameContainer');
-        this.containerChange = true;
-        this.add('gameContainer', this.reduce(action));
-        resizeGameContainer();
+      this.remove("gameContainer");
+      this.containerChange = true;
+      this.add("gameContainer", this.reduce(action));
+      resizeGameContainer();
     }
 
-    if (this.get('knife') != undefined)
-      this.get('knife').animate();
+    if (this.get("knife") != undefined) this.get("knife").animate();
   }
-
 }
 
 const stage = new Root();
@@ -226,7 +226,7 @@ const stage = new Root();
 let prev = null;
 
 function resizeGameContainer() {
-  const gameContainer = stage.get('gameContainer');
+  const gameContainer = stage.get("gameContainer");
   const state = stage.state;
 
   if (state === "archade mode" || state === "zen mode") {
@@ -268,14 +268,14 @@ function resizeGameContainer() {
   }
 }
 
-function resize(){
+function resize() {
   renderer.resize(window.innerWidth, window.innerHeight);
 
   stage.w = renderer.width;
   stage.h = renderer.height;
 
   if (stage.filesLoaded === stage.filesToLoad) {
-    const bg = stage.get('bg');
+    const bg = stage.get("bg");
     bg.width = window.innerWidth;
     bg.height = window.innerHeight;
     resizeGameContainer();
