@@ -20,8 +20,6 @@ export const Config = {
     freeze: 0xffffff,
     bomb: 0xffffff,
   },
-  ww: 1301,
-  wh: 654,
 };
 
 export const imageMappings = {};

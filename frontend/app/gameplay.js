@@ -6,6 +6,7 @@
 import PIXI from "pixi.js";
 
 import { Config, imageMappings, dropsColor, specials } from "./config";
+import constants from "../../constants.json";
 import BaseContainer from "./basecontainer";
 import { isIntersecting } from "./helpers";
 import { LoaderContainer } from "./others";
@@ -88,8 +89,8 @@ export default class GamePlayContainer extends BaseContainer {
 
       const getNewFruit = (id) => {
         const details = {
-          x: Math.random() * (Config.ww - 200) + 50,
-          y: Config.wh,
+          x: Math.random() * (constants.WIDTH - 200) + 50,
+          y: constants.HEIGHT,
           vx: Math.max(1, Math.random() * Config.fruit.vx),
           vy: Config.fruit.vy,
           width: Config.fruit.size,
@@ -101,7 +102,7 @@ export default class GamePlayContainer extends BaseContainer {
           omega: Math.random() * 0.01 * (Math.random() > 0.5 ? 1 : -1),
         };
 
-        if (details.x > Config.ww / 2) details.vx *= -1;
+        if (details.x > constants.WIDTH / 2) details.vx *= -1;
 
         const fruit = new PIXI.Sprite(PIXI.Texture.fromFrame(`fruit${id}.png`));
 
@@ -132,7 +133,7 @@ export default class GamePlayContainer extends BaseContainer {
         fruitsMissed = 0;
 
       for (const fruit of this.getAll("fruits")) {
-        if (fruit.y > Config.wh) {
+        if (fruit.y > constants.HEIGHT) {
           fruitsMissed += 1;
           this.remove("fruits", fruit.name);
         } else {
@@ -416,7 +417,7 @@ export default class GamePlayContainer extends BaseContainer {
       // Add layer
       const layer = new PIXI.Graphics();
       layer.beginFill(Config.specialFruitLayerColor[fruit.id], 1);
-      layer.drawRect(0, 0, Config.ww, Config.wh);
+      layer.drawRect(0, 0, constants.WIDTH, constants.HEIGHT);
       layer.alpha = fruit.id == "bomb" ? 1 : 0.3;
       this.add(`${fruit.id}Layer`, layer);
 
@@ -488,7 +489,7 @@ class ScoreBoard extends BaseContainer {
 class TimeBoard extends BaseContainer {
   constructor() {
     super();
-    this.x = Config.ww - 250;
+    this.x = constants.WIDTH - 250;
     this.y = 70;
   }
 
@@ -517,7 +518,7 @@ class TimeBoard extends BaseContainer {
 class CrossBoard extends BaseContainer {
   constructor() {
     super();
-    this.x = Config.ww - 250;
+    this.x = constants.WIDTH - 250;
     this.y = 70;
   }
 

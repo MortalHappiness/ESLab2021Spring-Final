@@ -4,6 +4,8 @@ const http = require("http");
 const WebSocket = require("ws");
 const { nanoid } = require("nanoid");
 
+const constants = require("../constants.json");
+
 const SERVER_PORT = process.env.SERVER_PORT || 8000;
 const SOCKET_PORT = process.env.SOCKET_PORT || 8001;
 
@@ -62,8 +64,8 @@ socketServer.on("connection", (socket) => {
         data.dy = data.dy || 0;
         state.x += data.dx;
         state.y += data.dy;
-        state.x = Math.max(Math.min(state.x, 1), -1);
-        state.y = Math.max(Math.min(state.y, 1), -1);
+        state.x = Math.min(Math.max(state.x, 0), constants.WIDTH);
+        state.y = Math.min(Math.max(state.y, 0), constants.HEIGHT);
       }
       // broadcast state information to all frontend clients
       wss.clients.forEach((client) => {
@@ -91,6 +93,10 @@ socketServer.listen(SOCKET_PORT, () => {
 
 app.use(express.static("../frontend/build"));
 app.use("/assets", express.static("../frontend/assets"));
+
+app.get("/state", (req, res) => {
+  res.send(state);
+});
 
 server.listen(SERVER_PORT, () => {
   console.log(`Web server listening on port ${server.address().port}`);

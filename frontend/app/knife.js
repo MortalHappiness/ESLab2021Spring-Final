@@ -3,7 +3,7 @@
 import PIXI from "pixi.js";
 
 import BaseContainer from "./basecontainer";
-import { Config } from "./config";
+import constants from "../../constants.json";
 
 export default class Knife extends BaseContainer {
   constructor(...args) {
@@ -19,7 +19,7 @@ export default class Knife extends BaseContainer {
       let drop = new PIXI.Graphics();
       //drop.lineStyle(4, 0xCF4710)
       drop.beginFill(0xffa800, 1);
-      drop.drawCircle(50, 50, (5 * window.innerWidth) / Config.ww);
+      drop.drawCircle(50, 50, (5 * window.innerWidth) / constants.WIDTH);
       drop.endFill();
       dropRenderer.render(drop);
       return dropRenderer.view;

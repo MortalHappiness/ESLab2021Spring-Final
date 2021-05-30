@@ -2,7 +2,7 @@ import PIXI from "pixi.js";
 
 import BaseContainer from "./basecontainer";
 import { isIntersecting } from "./helpers";
-import { Config } from "./config";
+import constants from "../../constants.json";
 
 class BaseWithBack extends BaseContainer {
   // Class holding back functionality in bottom right corner
@@ -13,8 +13,8 @@ class BaseWithBack extends BaseContainer {
     const back = new PIXI.Sprite(PIXI.Texture.fromFrame("back.png"));
     back.anchor.x = 0.5;
     back.anchor.y = 0.5;
-    back.x = Config.ww * 0.8;
-    back.y = Config.wh * 0.8;
+    back.x = constants.WIDTH * 0.8;
+    back.y = constants.HEIGHT * 0.8;
     this.add("back", back);
   }
 
@@ -46,8 +46,8 @@ export class HighScoreContainer extends BaseWithBack {
     label.anchor.x = 0.5;
     label.anchor.y = 0.5;
     label.width = 300;
-    label.x = Config.ww / 2;
-    label.y = (Config.wh * 1) / 4;
+    label.x = constants.WIDTH / 2;
+    label.y = (constants.HEIGHT * 1) / 4;
     this.addChild(label);
   }
 }
@@ -94,8 +94,8 @@ export class AboutGameContainer extends BaseWithBack {
 export class StateTransitionContainer extends BaseContainer {
   constructor(...args) {
     super(...args);
-    this.h = Config.wh;
-    this.w = Config.ww;
+    this.h = constants.HEIGHT;
+    this.w = constants.WIDTH;
     this.init();
   }
 

@@ -10,11 +10,13 @@ import {
   AboutGameContainer,
   LoaderContainer,
 } from "./others";
-import { Config } from "./config";
+import constants from "../../constants.json";
 
 const renderer = PIXI.autoDetectRenderer(
-  window.innerWidth,
-  window.innerHeight,
+  constants.WIDTH,
+  constants.HEIGHT,
+  //window.innerWidth,
+  //window.innerHeight,
   {
     antialiasing: false,
     transparent: false,
@@ -44,14 +46,10 @@ class Root extends BaseContainer {
 
     this.filesToLoad = 1;
     this.filesLoaded = 0;
-    this.on("mousedown", this.onMouseDown())
-      .on("touchstart", this.onMouseDown())
-      .on("mousemove", this.onMouseMove())
-      .on("touchmove", this.onMouseMove())
-      .on("mouseup", this.onMouseUp())
-      .on("mouseupoutside", this.onMouseUp())
-      .on("touchend", this.onMouseUp())
-      .on("touchendoutside", this.onMouseUp());
+    //this.on("mousedown", this.onMouseDown())
+    //  .on("mousemove", this.onMouseMove())
+    //  .on("mouseup", this.onMouseUp())
+    //  .on("mouseupoutside", this.onMouseUp());
     //.on('click', this.onClick)
 
     const options = ["about game", "new game", "high score"];
@@ -63,66 +61,138 @@ class Root extends BaseContainer {
 
   gameInit() {
     const bg = new PIXI.Sprite(PIXI.Texture.fromFrame("bg.png"));
-    bg.height = Config.wh;
-    bg.width = Config.ww;
+    bg.height = constants.HEIGHT;
+    bg.width = constants.WIDTH;
     bg.interactive = true;
     this.add("bg", bg, 0);
+    const blade = new PIXI.Sprite(
+      PIXI.loader.resources["assets/blade.png"].texture
+    );
+    blade.width = 64;
+    blade.height = 64;
+    this.add("blade", blade);
+
+    // ========================================
+
+    // WebSocket
+    window.WebSocket = window.WebSocket || window.MozWebSocket;
+    if (!window.WebSocket) {
+      document.write("Sorry, your browser doesn't support WebSocket.");
+      throw new Error("Browser does not support WebSocket");
+    }
+
+    this.connection = new WebSocket(`ws://${window.location.host}`);
+
+    this.connection.onopen = () => {
+      console.log("Connected to server");
+    };
+
+    this.connection.onclose = () => {
+      console.log("Disconnected from server");
+    };
+
+    this.connection.onerror = (error) => {
+      console.error(error);
+    };
+
+    this.connection.onmessage = (message) => {
+      try {
+        const data = JSON.parse(message.data);
+        this.onReceiveData(data);
+      } catch (e) {
+        console.error(e);
+      }
+    };
   }
 
   assetsLoaded() {
     this.gameInit();
     this.filesLoaded += 1;
-    resize();
+    //resize();
   }
 
   loadTextures() {
-    PIXI.loader.add("assets/basics.json").load(() => {
-      this.assetsLoaded();
-    });
-  }
-
-  onClick(e) {
-    this.pause = !this.pause;
-  }
-
-  onMouseDown() {
-    return (e) => {
-      this.cutting = true;
-      let position = e.data.global;
-      this.mouseData.push({
-        x: position.x,
-        y: position.y,
+    PIXI.loader
+      .add("assets/basics.json")
+      .add("assets/blade.png")
+      .load(() => {
+        this.assetsLoaded();
       });
+  }
+
+  onReceiveData(data) {
+    const blade = stage.get("blade");
+    blade.x = data.x;
+    blade.y = data.y;
+
+    // mouse down
+    if (!this.cutting && data.pressed) {
+      this.cutting = true;
+      this.mouseData.push({ x: data.x, y: data.y });
       if (this.get("knife") === undefined) {
         this.add("knife", new Knife());
       }
-    };
-  }
-
-  onMouseUp() {
-    return (e) => {
+      return;
+    }
+    // mouse up
+    if (this.cutting && !data.pressed) {
       this.cutting = false;
       this.mouseData = [];
-    };
-  }
-
-  onMouseMove() {
-    return (e) => {
-      let position = e.data.global;
-      if (this.cutting) {
-        this.mouseData.push({
-          x: position.x,
-          y: position.y,
-        });
-
-        let knife = this.get("knife");
-        while (knife.shifts > 0) {
-          this.mouseData.shift();
-          knife.shifts -= 1;
-        }
+      return;
+    }
+    // mouse move
+    if (this.cutting) {
+      this.mouseData.push({ x: data.x, y: data.y });
+      let knife = this.get("knife");
+      while (knife.shifts > 0) {
+        this.mouseData.shift();
+        knife.shifts -= 1;
       }
-    };
+    }
   }
+
+  //onClick(e) {
+  //  this.pause = !this.pause;
+  //}
+
+  //onMouseDown() {
+  //  return (e) => {
+  //    this.cutting = true;
+  //    let position = e.data.global;
+  //    this.mouseData.push({
+  //      x: position.x,
+  //      y: position.y,
+  //    });
+  //    if (this.get("knife") === undefined) {
+  //      this.add("knife", new Knife());
+  //    }
+  //  };
+  //}
+
+  //onMouseUp() {
+  //  return (e) => {
+  //    this.cutting = false;
+  //    this.mouseData = [];
+  //  };
+  //}
+
+  //onMouseMove() {
+  //  return (e) => {
+  //    let position = e.data.global;
+  //    if (this.cutting) {
+  //      this.mouseData.push({
+  //        x: position.x,
+  //        y: position.y,
+  //      });
+
+  //      let knife = this.get("knife");
+  //      while (knife.shifts > 0) {
+  //        this.mouseData.shift();
+  //        knife.shifts -= 1;
+  //      }
+  //    }
+  //  };
+  //}
 
   reduceInitial(action) {
     /**
@@ -214,7 +284,7 @@ class Root extends BaseContainer {
       this.remove("gameContainer");
       this.containerChange = true;
       this.add("gameContainer", this.reduce(action));
-      resizeGameContainer();
+      //resizeGameContainer();
     }
 
     if (this.get("knife") != undefined) this.get("knife").animate();
@@ -223,64 +293,64 @@ class Root extends BaseContainer {
 
 const stage = new Root();
 
-let prev = null;
+//let prev = null;
 
-function resizeGameContainer() {
-  const gameContainer = stage.get("gameContainer");
-  const state = stage.state;
+//function resizeGameContainer() {
+//  const gameContainer = stage.get("gameContainer");
+//  const state = stage.state;
 
-  if (state === "archade mode" || state === "zen mode") {
-    if (stage.containerChange) {
-      gameContainer.scale.x *= window.innerWidth / Config.ww;
-      gameContainer.scale.y *= window.innerHeight / Config.wh;
-      stage.containerChange = false;
-    } else {
-      gameContainer.scale.x *= renderer.width / stage.w - 0.1;
-      gameContainer.scale.y *= renderer.height / stage.h;
-    }
-  } else {
-    if (gameContainer.loading) {
-      /*prev = {'x': gameContainer.scale.x, 'y': gameContainer.scale.y};
-      gameContainer.scale.x *= window.innerWidth / Config.ww;
-      gameContainer.scale.y *= window.innerHeight / Config.wh;*/
-    } else {
-      if (prev !== null) {
-        gameContainer.scale.x = prev.x;
-        gameContainer.scale.y = prev.y;
-        prev = null;
-      }
+//  if (state === "archade mode" || state === "zen mode") {
+//    if (stage.containerChange) {
+//      gameContainer.scale.x *= window.innerWidth / Config.ww;
+//      gameContainer.scale.y *= window.innerHeight / Config.wh;
+//      stage.containerChange = false;
+//    } else {
+//      gameContainer.scale.x *= renderer.width / stage.w - 0.1;
+//      gameContainer.scale.y *= renderer.height / stage.h;
+//    }
+//  } else {
+//    if (gameContainer.loading) {
+//      [>prev = {'x': gameContainer.scale.x, 'y': gameContainer.scale.y};
+//      gameContainer.scale.x *= window.innerWidth / Config.ww;
+//      gameContainer.scale.y *= window.innerHeight / Config.wh;*/
+//    } else {
+//      if (prev !== null) {
+//        gameContainer.scale.x = prev.x;
+//        gameContainer.scale.y = prev.y;
+//        prev = null;
+//      }
 
-      if (stage.containerChange) {
-        let scale = window.innerHeight / Config.wh;
-        if (window.innerHeight < 400) scale += 0.05;
-        //  let scale = window.innerWidth / Config.ww;
-        gameContainer.scale.x *= scale;
-        gameContainer.scale.y *= scale;
-        stage.containerChange = false;
-      } else {
-        let scale = renderer.height / stage.h;
-        if (renderer.width < 400) scale += 0.05;
-        // let scale = window.innerWidth/Config.ww;
-        gameContainer.scale.x *= scale;
-        gameContainer.scale.y *= scale;
-      }
-    }
-  }
-}
+//      if (stage.containerChange) {
+//        let scale = window.innerHeight / Config.wh;
+//        if (window.innerHeight < 400) scale += 0.05;
+//        //  let scale = window.innerWidth / Config.ww;
+//        gameContainer.scale.x *= scale;
+//        gameContainer.scale.y *= scale;
+//        stage.containerChange = false;
+//      } else {
+//        let scale = renderer.height / stage.h;
+//        if (renderer.width < 400) scale += 0.05;
+//        // let scale = window.innerWidth/Config.ww;
+//        gameContainer.scale.x *= scale;
+//        gameContainer.scale.y *= scale;
+//      }
+//    }
+//  }
+//}
 
-function resize() {
-  renderer.resize(window.innerWidth, window.innerHeight);
+//function resize() {
+//  renderer.resize(window.innerWidth, window.innerHeight);
 
-  stage.w = renderer.width;
-  stage.h = renderer.height;
+//  stage.w = renderer.width;
+//  stage.h = renderer.height;
 
-  if (stage.filesLoaded === stage.filesToLoad) {
-    const bg = stage.get("bg");
-    bg.width = window.innerWidth;
-    bg.height = window.innerHeight;
-    resizeGameContainer();
-  }
-}
+//  if (stage.filesLoaded === stage.filesToLoad) {
+//    const bg = stage.get("bg");
+//    bg.width = window.innerWidth;
+//    bg.height = window.innerHeight;
+//    resizeGameContainer();
+//  }
+//}
 
 function animate() {
   stage.animate();
@@ -288,5 +358,5 @@ function animate() {
   requestAnimationFrame(animate);
 }
 
-window.addEventListener("resize", resize);
+//window.addEventListener("resize", resize);
 animate();
