@@ -4,7 +4,9 @@ const http = require("http");
 const WebSocket = require("ws");
 const { nanoid } = require("nanoid");
 
-const SERVER_PORT = process.env.PORT || 8000;
+const constants = require("../constants.json");
+
+const SERVER_PORT = process.env.SERVER_PORT || 8000;
 const SOCKET_PORT = process.env.SOCKET_PORT || 8001;
 
 const app = express();
@@ -15,6 +17,7 @@ const socketServer = net.createServer();
 // ========================================
 
 const state = {
+  pressed: false,
   x: 0,
   y: 0,
 };
@@ -50,20 +53,26 @@ socketServer.on("connection", (socket) => {
     try {
       const data = JSON.parse(message.toString());
       console.log("Receive", data, `from STM32 ${socket.id}`);
+      if (data.mouse === "down") {
+        state.pressed = true;
+      }
+      if (data.mouse === "up") {
+        state.pressed = false;
+      }
       if (typeof data.dx === "number" || typeof data.dy === "number") {
         data.dx = data.dx || 0;
         data.dy = data.dy || 0;
         state.x += data.dx;
         state.y += data.dy;
-        state.x = Math.max(Math.min(state.x, 1), -1);
-        state.y = Math.max(Math.min(state.y, 1), -1);
-        // broadcast state information to all frontend clients
-        wss.clients.forEach((client) => {
-          if (client.readyState === WebSocket.OPEN) {
-            client.send(JSON.stringify(state));
-          }
-        });
+        state.x = Math.min(Math.max(state.x, 0), constants.WIDTH);
+        state.y = Math.min(Math.max(state.y, 0), constants.HEIGHT);
       }
+      // broadcast state information to all frontend clients
+      wss.clients.forEach((client) => {
+        if (client.readyState === WebSocket.OPEN) {
+          client.send(JSON.stringify(state));
+        }
+      });
     } catch (e) {
       console.error(
         `Invalid message from STM32 ${socket.id}: ${message.toString()}`
@@ -82,7 +91,12 @@ socketServer.listen(SOCKET_PORT, () => {
 
 // ========================================
 
-app.use(express.static("../frontend"));
+app.use(express.static("../frontend/build"));
+app.use("/assets", express.static("../frontend/assets"));
+
+app.get("/state", (req, res) => {
+  res.send(state);
+});
 
 server.listen(SERVER_PORT, () => {
   console.log(`Web server listening on port ${server.address().port}`);

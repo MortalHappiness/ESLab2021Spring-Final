@@ -2,6 +2,8 @@
 # Created by https://www.toptal.com/developers/gitignore/api/vim,vscode,node
 # Edit at https://www.toptal.com/developers/gitignore?templates=vim,vscode,node
 
+frontend/build/
+
 ### Node ###
 # Logs
 logs
