@@ -13,33 +13,28 @@
  * See the License for the specific language governing permissions and
  * limitations under the License.
  */
-#include <cstdint>
-#include <string>
+// #include <cstdint>
+// #include <string>
 
 #include "BUILD/DISCO_L475VG_IOT01A/ARMC6/mbed_config.h"
 #include "Callback.h"
-#include "NetworkInterface.h"
+// #include "NetworkInterface.h"
 #include "PinNames.h"
-#include "WiFiInterface.h"
-// #include "wifi_helper.h"
-#include "ISM43362Interface.h"
-#include "SocketAddress.h"
-#include "TCPSocket.h"
-#include "mbed.h"
-#include "stm32l475e_iot01_accelero.h"
-#include "stm32l475e_iot01_gyro.h"
+// #include "WiFiInterface.h"
+// #include "ISM43362Interface.h"
+// #include "SocketAddress.h"
+// #include "TCPSocket.h"
+// #include "mbed.h"
+// #include "stm32l475e_iot01_accelero.h"
+// #include "stm32l475e_iot01_gyro.h"
 // #include "stm32l475e_iot01_hsensor.h"
 // #include "stm32l475e_iot01_psensor.h"
 // #include "stm32l475e_iot01_magneto.h"
-#include "ISM43362Interface.h"
-#include "SocketAddress.h"
-#include "TCPSocket.h"
-// #include "wifi_helper.h"
 
-// #define WIFI_IDW0XX1 2
+#include "Wifi.h"
 
 // #if (defined(TARGET_DISCO_L475VG_IOT01A) || defined(TARGET_DISCO_F413ZH))
-#include "ISM43362Interface.h"
+// #include "ISM43362Interface.h"
 ISM43362Interface wifig(MBED_CONF_APP_WIFI_SPI_MOSI,
                         MBED_CONF_APP_WIFI_SPI_MISO,
                         MBED_CONF_APP_WIFI_SPI_SCLK, MBED_CONF_APP_WIFI_SPI_NSS,
@@ -47,357 +42,21 @@ ISM43362Interface wifig(MBED_CONF_APP_WIFI_SPI_MOSI,
                         MBED_CONF_APP_WIFI_WAKEUP, false);
 ;
 
-// #else // External WiFi modules
 
-// #if MBED_CONF_APP_WIFI_SHIELD == WIFI_IDW0XX1
-// #include "SpwfSAInterface.h"
-// SpwfSAInterface wifig(MBED_CONF_APP_WIFI_TX, MBED_CONF_APP_WIFI_RX);
-// #endif // MBED_CONF_APP_WIFI_SHIELD == WIFI_IDW0XX1
 
-// #endif
-// #include "ISM43362Interface.h"
-// ISM43362Interface wifi(false);
 
-// Serial pc(USBTX, USBRX);
 InterruptIn button(BUTTON1);
 
-#define IP_ADDR "172.20.10.7"
-// "192.168.43.180" "172.20.10.7"
-#define PORT_NUM 8001
+
 #define SEND_INT 1
-#define SAMPLE_RATE 10
+
 #define PLAYER 1
-// #define MBED_CONF_APP_WIFI_SSID "Jeff0937"
-// #define MBED_CONF_APP_WIFI_PASSWORD "0937988311"
-// #define DRUNK
-// #define USE_ANGLE
+
 Thread button_thread;
 Thread velocity_thread;
 EventQueue button_event_queue(16 * EVENTS_EVENT_SIZE);
 EventQueue velocity_event_queue(16 * EVENTS_EVENT_SIZE);
-static events::EventQueue event_queue(16 * EVENTS_EVENT_SIZE);
-
-const char *sec2str(nsapi_security_t sec) {
-    switch (sec) {
-    case NSAPI_SECURITY_NONE:
-        return "None";
-    case NSAPI_SECURITY_WEP:
-        return "WEP";
-    case NSAPI_SECURITY_WPA:
-        return "WPA";
-    case NSAPI_SECURITY_WPA2:
-        return "WPA2";
-    case NSAPI_SECURITY_WPA_WPA2:
-        return "WPA/WPA2";
-    case NSAPI_SECURITY_UNKNOWN:
-    default:
-        return "Unknown";
-    }
-}
-
-class Sensor {
-#define SCALE_MULTIPLIER 0.045
-#define TIMESTEP (float)SAMPLE_RATE / 1000 / 2
-  public:
-    Sensor(events::EventQueue &event_queue) : _event_queue(event_queue) {
-        BSP_ACCELERO_Init();
-        BSP_GYRO_Init();
-        calibrate();
-        _event_queue.call_every(SAMPLE_RATE, this, &Sensor::update);
-        _event_queue.call_every(SAMPLE_RATE * 2, this,
-                                &Sensor::update_position);
-    }
-
-    void calculate(float *pGyroDataXYZ, int16_t *pAccDataXYZ) {
-        for (int i = 0; i < 3; ++i) {
-            float v = _velocity[i];
-            if (abs(pAccDataXYZ[i]) > 3) {
-                // if(_velocity[i] >  -pAccDataXYZ[i]/50 ||_velocity[i] <
-                // -pAccDataXYZ[i]/50){
-                //     _velocity[i] *= 0.5;
-                // }
-                _velocity[i] += pAccDataXYZ[i] * TIMESTEP;
-                // }
-                // _velocity[i] +=(pAccDataXYZ[i] + pAccDataXYZ[i]) / 2 *
-                // TIMESTEP;
-            }
-
-            // else if (abs(pAccDataXYZ[i]) > 4) {
-            //     _velocity[i] += (pAccDataXYZ[i]) * TIMESTEP;
-            // }
-            //  else{
-            //     _velocity[i] += (pAccDataXYZ[i]) * TIMESTEP;
-            // }
-            else {
-                // if (abs(_velocity[i]) < 5)
-                //     _velocity[i] = 0;
-                // else (abs(_velocity[i]) < 10){
-                //     _velocity[i] *= 0.5;
-                // }
-                // else{
-                // _velocity[i] += (pAccDataXYZ[i]) * TIMESTEP;
-                // if (_velocity[i] < 10){
-                _velocity[i] *= 0.5;
-                // }
-                // }
-            }
-            if (v * _velocity[i] < 0) {
-                _velocity[i] = 0;
-            } else if (_velocity[i] > 25) {
-                _velocity[i] = 25;
-            } else if (_velocity[i] < -25) {
-                _velocity[i] = -25;
-            }
-        }
-
-        // if (abs(pAccDataXYZ[2]) > 10)
-        //     _velocity[0] = _velocity[1] = 0;
-        // printf("a: %d %d\n", _pAccDataXYZ[0], _pAccDataXYZ[1]);
-        // printf("v: %3f %3f\n", _velocity[0], _velocity[1]);
-        // printf("p: %3f %3f\n", _position[0], _position[1]);
-        for (int i = 0; i < 3; ++i) {
-            _GyroAccumulate[i] = pGyroDataXYZ[i];
-            _AccAccumulate[i] = pAccDataXYZ[i];
-        }
-    }
-
-    void update_position() {
-        for (int i = 0; i < 3; ++i) {
-            _position[i] += _velocity[i];
-        }
-    }
-
-    void calibrate() {
-        printf("Calibrating...\n");
-        int num = 0;
-
-        for (int i = 0; i < 3; ++i)
-            _GyroOffset[i] = _AccOffset[i] = 0;
-
-        while (num < 2000) {
-            num++;
-            BSP_GYRO_GetXYZ(_pGyroDataXYZ);
-            BSP_ACCELERO_AccGetXYZ(_pAccDataXYZ);
-            for (int i = 0; i < 3; ++i) {
-                _GyroOffset[i] += _pGyroDataXYZ[i];
-                _AccOffset[i] += _pAccDataXYZ[i];
-            }
-            ThisThread::sleep_for(TIMESTEP);
-        }
-
-        for (int i = 0; i < 3; ++i) {
-            _GyroOffset[i] /= num;
-            _AccOffset[i] /= num;
-
-            _angle[i] = _velocity[i] = _pAccDataXYZ[i] = _pGyroDataXYZ[i] = 0;
-        }
-
-        for (int i = 0; i < 3; ++i)
-            printf("%d ", _AccOffset[i]);
-        printf("\n");
-        for (int i = 0; i < 3; ++i)
-            printf("%6f ", (_GyroOffset[i]));
-        printf("\n");
-
-        printf("Done calibration\n");
-    }
-
-    void update() {
-        ++_sample_num;
-
-        BSP_GYRO_GetXYZ(_pGyroDataXYZ);
-        BSP_ACCELERO_AccGetXYZ(_pAccDataXYZ);
-
-        for (int i = 0; i < 3; ++i) {
-            _pGyroDataXYZ[i] =
-                (_pGyroDataXYZ[i] - _GyroOffset[i]) * SCALE_MULTIPLIER;
-            _pAccDataXYZ[i] = (_pAccDataXYZ[i] - _AccOffset[i]);
-        }
-        // printf("%d %d %d\n", _pAccDataXYZ[0], _pAccDataXYZ[1],
-        // _pAccDataXYZ[2]);
-        calculate(_pGyroDataXYZ, _pAccDataXYZ);
-    }
-
-    void getDirection(int16_t &right, int16_t &up) {
-        up = (int16_t)(_velocity[0]);
-        right = (int16_t)(_velocity[1]);
-        // printf("send: %d %d\n", up, right);
-    }
-
-    void getVelocity(float &right, float &up) {
-        up = -(_velocity[0]);
-        right = -(_velocity[1]);
-    }
-
-    // returns angle / 2 due to 8 bit
-    void getAngle(uint8_t &angle) { angle = int(_angle[2]) / 2; }
-
-  private:
-    float _angle[3] = {};
-    float _velocity[3] = {};
-    int _k[3] = {};
-
-    float _GyroAccumulate[3] = {};
-    float _AccAccumulate[3] = {};
-
-    int _sample_num = 0;
-    int16_t _pAccDataXYZ[3] = {0, 0, 0};
-    float _pGyroDataXYZ[3] = {0, 0, 0};
-
-    int _AccOffset[3] = {};
-    float _GyroOffset[3] = {};
-
-    float _position[3] = {0, 0, 0};
-
-    events::EventQueue &_event_queue;
-};
-
-class Wifi {
-  public:
-    Wifi(Sensor *sensor, events::EventQueue &event_queue,
-         ISM43362Interface *wifi)
-        : _sensor(sensor), _event_queue(event_queue), _wifi(wifi),
-          _led1(LED1, 1) {
-        // _wifi();
-        down = 0;
-        // scan_demo();
-        connect();
-    }
-
-    void scan_demo() {
-        WiFiAccessPoint *ap;
-
-        printf("Scan:\n");
-
-        // int count = _wifi->scan(NULL, 0);
-        // printf("%d networks available.\n", count);
-
-        /* Limit number of network arbitrary to 15 */
-        int count = 10;
-        count = count < 15 ? count : 15;
-
-        ap = new WiFiAccessPoint[count];
-        count = _wifi->scan(ap, count);
-        for (int i = 0; i < count; i++) {
-            printf("Network: %s secured: %s BSSID: "
-                   "%hhX:%hhX:%hhX:%hhx:%hhx:%hhx RSSI: %hhd Ch: %hhd\r\n",
-                   ap[i].get_ssid(), sec2str(ap[i].get_security()),
-                   ap[i].get_bssid()[0], ap[i].get_bssid()[1],
-                   ap[i].get_bssid()[2], ap[i].get_bssid()[3],
-                   ap[i].get_bssid()[4], ap[i].get_bssid()[5], ap[i].get_rssi(),
-                   ap[i].get_channel());
-        }
-        printf("%d networks available.\r\n", count);
-        delete[] ap;
-    }
-
-    void connect() {
-
-        if (!_wifi) {
-            printf("ERROR: No WiFiInterface found.\n");
-            return;
-        }
-        // #ifdef CONNECT
-        printf("\nConnecting to %s...\n", MBED_CONF_APP_WIFI_SSID);
-        int ret =
-            _wifi->connect(MBED_CONF_APP_WIFI_SSID, MBED_CONF_APP_WIFI_PASSWORD,
-                           NSAPI_SECURITY_WPA_WPA2);
-        if (ret != 0) {
-            printf("\nConnection error: %d\n", ret);
-            return;
-        }
-
-        nsapi_error_t result;
-        // TCPSocket _socket;
-        SocketAddress a;
-        _wifi->get_ip_address(&a);
-        printf("IP: %s\n", a.get_ip_address() ? a.get_ip_address() : "None");
-        result = _socket.open(_wifi);
-        if (result != 0) {
-            printf("Error! socket.open() returned: %d\n", result);
-            _socket.close();
-            return;
-        }
-        _a.set_ip_address(IP_ADDR);
-        _a.set_port(PORT_NUM);
-        result = _socket.connect(_a);
-
-        if (result != 0) {
-            printf("Error! socket.connect() returned: %d\n", result);
-            // Close the socket to return its memory and bring down the network
-            // interface
-            _socket.close();
-            return;
-        }
-
-        printf("\nSuccess\n");
-        printf("MAC: %s\n", _wifi->get_mac_address());
-        _wifi->get_ip_address(&a);
-        printf("IP: %s\n", a.get_ip_address());
-        _wifi->get_netmask(&a);
-        printf("Netmask: %s\n", a.get_ip_address());
-        _wifi->get_gateway(&a);
-        printf("Gateway: %s\n", a.get_ip_address());
-        printf("RSSI: %d\n\n", _wifi->get_rssi());
-        printf("Connected to IP: %s, Port: %d\n", IP_ADDR, PORT_NUM);
-        // #endif
-        _event_queue.call_every(50ms, this, &Wifi::send_data);
-        _event_queue.call_every(500ms, this, &Wifi::blink);
-    }
-
-    void blink() { _led1 = !_led1; }
-
-    void button_send_data() {
-        // printf("send mouse\n");
-        down = !down;
-        string sbuffer;
-        if (down) {
-            sbuffer = "{\"mouse\":\"down\"}";
-        } else {
-            sbuffer = "{\"mouse\":\"up\"}";
-        }
-
-        const char *cbuffer = sbuffer.c_str();
-        int ret = _socket.sendto(_a, cbuffer, strlen(cbuffer)); // IP_ADDR,
-        // PORT_NUM,
-    }
-
-    ~Wifi() {
-        _socket.close();
-        _wifi->disconnect();
-    }
-
-    void send_data() {
-        float right = 0, up = 0;
-        // int16_t right = 0, up = 0;
-        uint8_t angle = 0;
-        // _sensor->getDirection(right, up);
-        _sensor->getVelocity(right, up);
-#ifdef USE_ANGLE
-        _sensor->getAngle(angle);
-#endif // USE_ANGLE
-       // printf("send: %d %d\n", up, right);
-        SocketAddress a;
-        a.set_ip_address(IP_ADDR);
-        a.set_port(PORT_NUM);
-        char buffer[1024];
-        // int len = sprintf(buffer, "{\'dx\': %f,\'dy\':%f}", (right, up));
-        string sbuffer =
-            "{\"dx\":" + to_string(right) + ",\"dy\":" + to_string(up) + "}";
-        const char *cbuffer = sbuffer.c_str();
-        int ret = _socket.sendto(_a, cbuffer, strlen(cbuffer)); // IP_ADDR,
-        // PORT_NUM,
-    }
-
-  private:
-    WiFiInterface *_wifi;
-    TCPSocket _socket;
-    Sensor *_sensor;
-    DigitalOut _led1;
-    SocketAddress _a;
-    events::EventQueue &_event_queue;
-    int down;
-};
+EventQueue event_queue(16 * EVENTS_EVENT_SIZE);
 
 Sensor sensor(event_queue);
 Wifi wifi(&sensor, velocity_event_queue, &wifig);
