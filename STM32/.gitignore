@@ -4,4 +4,5 @@ projectfiles
 *.py*
 mbed-os
 BUILD
-
+BSP_B-L475E-IOT01/
+wifi-ism43362/
