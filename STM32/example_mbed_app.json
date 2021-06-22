@@ -1,16 +1,16 @@
 {
     "config": {
         "wifi-shield": {
-            "help": "Options are internal, WIFI_ESP8266, WIFI_IDW0XX1",
-            "value": "internal"
+            "help": "Options are internal, WIFI_IDW0XX1",
+            "value": "WIFI_ISM43362"
         },
         "wifi-ssid": {
             "help": "WiFi SSID",
-            "value": "Jeff0937"
+            "value": "\"Your SSID\""
         },
         "wifi-password": {
             "help": "WiFi Password",
-            "value": "0937988311"
+            "value": "\"Your password\""
         },
         "wifi-tx": {
             "help": "TX pin for serial connection to external device",
@@ -52,9 +52,6 @@
     "target_overrides": {
         "*": {
             "platform.stdio-convert-newlines": true
-        },
-        "UBLOX_EVK_ODIN_W2": {
-            "target.device_has": ["EMAC"]
         },
         "NUCLEO_L476RG": {
             "wifi-tx": "D8",
