@@ -19,7 +19,7 @@ class CanvasSocketWidget:
     def __enter__(self):
         self.s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.s.connect((HOST, SOCKET_PORT))
-        with urllib.request.urlopen(f"http://localhost:{SERVER_PORT}/state") as res:
+        with urllib.request.urlopen(f"http://{HOST}:{SERVER_PORT}/state") as res:
             state = json.loads(res.read())
         self.prev_pos = (state["x"], state["y"])
         return self
