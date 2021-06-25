@@ -137,7 +137,7 @@ Server 使用一個 port 當作 TCP socket server 負責接收來自 STM32 的�
 
 部屬的遊戲網址：http://34.80.242.27:3000
 
-Demo 影片：
+Demo 影片：https://www.youtube.com/watch?v=G5BrsayyrR8
 
 ## 參考資料
 
