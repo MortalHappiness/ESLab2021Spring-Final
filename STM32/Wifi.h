@@ -5,7 +5,7 @@
 #include "Sensor.h"
 #include <string>
 #define IP_ADDR "172.20.10.7"
-// "192.168.43.180" "172.20.10.7"
+// "192.168.43.180" "172.20.10.7" "34.80.242.27"
 #define PORT_NUM 8001
 const char *sec2str(nsapi_security_t sec) {
     switch (sec) {

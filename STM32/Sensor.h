@@ -51,17 +51,17 @@ class Sensor {
             }
             if (v * _velocity[i] < 0) {
                 _velocity[i] = 0;
-            } else if (_velocity[i] > 23) {
-                _velocity[i] = 23;
-            } else if (_velocity[i] < -23) {
-                _velocity[i] = -23;
+            } else if (_velocity[i] > 20) {
+                _velocity[i] = 20;
+            } else if (_velocity[i] < -20) {
+                _velocity[i] = -20;
             }
         }
         float total = _velocity[1] *_velocity[1] + _velocity[0] * _velocity[0];
-        if(total > 529){
+        if(total > 400){
             
-            _velocity[1] = _velocity[1] / (total ) * 529;
-            _velocity[0] = _velocity[0] / (total ) * 529;
+            _velocity[1] = _velocity[1] / (total ) * 400;
+            _velocity[0] = _velocity[0] / (total ) * 400;
         }
         // if (abs(pAccDataXYZ[2]) > 10)
         //     _velocity[0] = _velocity[1] = 0;
