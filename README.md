@@ -92,11 +92,13 @@ See the [README.md](./STM32/README.md) inside `STM32` folder.
    3. `send_data()`
       送 velocity data 給 server
 3. `main.c`
+
    1. 創三個 event queue，以及兩條額外的 thread
    2. Include `Wifi.h` and `Sensor.h` 建立這兩個 file 的 class object，sensor 和 wifi 分別傳入不同的 event queue
    3. `button_change()`
       將`wifi::button_send_data`加入最後一個 event queue
    4. `main()`
+
       ```
       #button thread dispath button event queue
       button_thread.start(
@@ -114,6 +116,22 @@ See the [README.md](./STM32/README.md) inside `STM32` folder.
       ```
 
 #### Optimization and Algorithm
+
+- Noise and Brake
+  if abs(acc data) > 3, add value to velocity
+  if abs(acc data) <= 3, velocity divided by 2
+- Clip velocity value
+  -25 <= velocity <= 25
+  也就是 total = velocity\*x ^ 2 + velocity_y ^ 2 <= 625
+  超過的話線性縮小
+  velocity_x = velocity_x * 625 / total
+  velocity*y = velocity_y \* 625 / total
+- Scale
+  \_velocity[i] += pAccDataXYZ[i] \* TIMESTEP
+  TIMESTEP = (float)SAMPLE_RATE / 1000 / 3
+  修改 TIMESTEP 以調整靈敏度
+- Data type
+  傳送的資料以 json string 給 server，方便 server 處理
 
 #### Some problem we solve
 
@@ -136,9 +154,9 @@ Server 使用一個 port 當作 TCP socket server 負責接收來自 STM32 的�
 
 Demo 影片：
 
-+ https://youtu.be/24Oy_ZMIOQY
-+ https://youtu.be/DjKRe0RnraI
-+ https://youtu.be/G5BrsayyrR8
+- https://youtu.be/24Oy_ZMIOQY
+- https://youtu.be/DjKRe0RnraI
+- https://youtu.be/G5BrsayyrR8
 
 ## 參考資料
 
