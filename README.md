@@ -1,6 +1,6 @@
 # ESLab2021Spring-Final
 
-嵌入式實驗 Final Project - Mbed Fruit Ninga (搖桿切西瓜遊戲)
+嵌入式實驗 Final Project - Mbed Fruit Ninja (搖桿切西瓜遊戲)
 
 ## Team Member
 
